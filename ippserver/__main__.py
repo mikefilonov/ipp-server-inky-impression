@@ -79,6 +79,11 @@ def behaviour_from_parsed_args(args):
         return getattr(importlib.import_module(module), name)(*args.command)
     if args.action == 'reject':
         return behaviour.RejectAllPrinter()
+
+    if args.action == 'save':
+        return behaviour.ShowOnInkyDisplayPrinter(
+            directory=args.directory)
+
     raise RuntimeError(args)
 
 
