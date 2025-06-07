@@ -483,32 +483,6 @@ class SaveFilePrinter(StatelessPrinter):
         # Possibly use the job name from the ipp_request?
         return 'ipp-server-print-job-%s.%s' % (uuid.uuid1(), self.filename_ext)
 
-class ShowOnInkyDisplayPrinter(StatelessPrinter):
-    def __init__(self, directory):
-        self.directory = directory
-        ppd = BasicPdfPPD()
-        super(SaveFilePrinter, self).__init__(ppd=ppd)
-
-    def handle_postscript(self, ipp_request, postscript_file):
-        filename = self.filename(ipp_request)
-        logging.info('Saving print job as %r', filename)
-        with open(filename, 'wb') as diskfile:
-            for block in read_in_blocks(postscript_file):
-                diskfile.write(block)
-        self.run_after_saving(filename, ipp_request)
-
-    def run_after_saving(self, filename, ipp_request):
-        pass
-
-    def filename(self, ipp_request):
-        leaf = self.leaf_filename(ipp_request)
-        return os.path.join(self.directory, leaf)
-
-    def leaf_filename(self, _ipp_request):
-        # Possibly use the job name from the ipp_request?
-        return 'ipp-server-print-job-%s.%s' % (uuid.uuid1(), self.filename_ext)
-
-
 class SaveAndRunPrinter(SaveFilePrinter):
     def __init__(self, directory, use_env, filename_ext, command):
         self.command = command

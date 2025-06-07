@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 __package__ = "ippserver"
 
 
-from . import behaviour
+from . import behaviour, inky
 from .pc2paper import Pc2Paper
 from .server import run_server, IPPServer, IPPRequestHandler
 
@@ -28,6 +28,9 @@ def parse_args(args=None):
 
     parser_save = parser_action.add_parser('save', help='Write any print jobs to disk')
     parser_save.add_argument('--pdf', action='store_true', default=False, help=pdf_help)
+    parser_save.add_argument('directory', metavar='DIRECTORY', help='Directory to save files into')
+
+    parser_save = parser_action.add_parser('inky', help='Write any print jobs to inky display')
     parser_save.add_argument('directory', metavar='DIRECTORY', help='Directory to save files into')
 
     parser_command = parser_action.add_parser('run', help='Run a command when recieving a print job')
@@ -80,15 +83,14 @@ def behaviour_from_parsed_args(args):
     if args.action == 'reject':
         return behaviour.RejectAllPrinter()
     if args.action == 'inky':
-        return behaviour.ShowOnInkyDisplayPrinter(
-            directory=args.directory)
+        return inky.ShowOnInkyDisplayPrinter(
+            directory=args.directory, filename_ext='pdf')
     raise RuntimeError(args)
 
 
 def main(args=None):
     parsed_args = parse_args(args)
     logging.basicConfig(level=logging.DEBUG if parsed_args.verbose else logging.INFO)
-
     server = IPPServer(
         (parsed_args.host, parsed_args.port),
         IPPRequestHandler,
